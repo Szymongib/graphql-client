@@ -15,6 +15,14 @@ if [[ $? != 0 ]]; then
 else echo -e "${GREEN}√ go mod verify${NC}"
 fi
 
+echo "? go mod download"
+downloadResult=$(go mod download)
+if [[ $? != 0 ]]; then
+	echo -e "${RED}✗ go mod download\n$downloadResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ go mod download${NC}"
+fi
+
 echo "? go test"
 go test ./...
 if [[ $? != 0 ]]; then
