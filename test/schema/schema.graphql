@@ -1,0 +1,58 @@
+# TODO - need some embeded queries
+# TODO - need some maps
+
+type Dog {
+    id: ID!
+    name: String!
+    ownerId: String!
+    tailLength: Int
+    distinguishingFeatures: [DistinguishingFeature]
+}
+
+input DogInput {
+    name: String!
+    tailLength: Int
+    distinguishingFeatures: [DistinguishingFeatureInput]
+}
+
+type DistinguishingFeature {
+    description: String!
+    spottingDifficulty: Float
+}
+
+input DistinguishingFeatureInput {
+    description: String!
+    spottingDifficulty: Float
+}
+
+type Human {
+    id: ID!
+    name: String!
+    dogs: [Dog]
+}
+
+input HumanInput {
+    name: String!
+    dogs: [DogInput]
+}
+
+type Header {
+    name: String!
+    values: [String]!
+}
+
+type Query {
+    humans: [Human]
+    human(id: ID!): Human!
+    dogs: [Dog]
+    dog(id: ID!): Dog!
+    headersQuery: [Header]!
+    errorsQuery: String!
+}
+
+type Mutation {
+    createHuman(in: HumanInput!): Human!
+    createDog(humanID: ID!, in: DogInput!): Dog
+    headersMutation: [Header]!
+    errorsMutation: String!
+}
