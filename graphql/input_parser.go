@@ -171,7 +171,6 @@ func (o ParserOptions) mapToGQLInput(reflectVal reflect.Value, indent int) (stri
 			return "", false, nil
 		}
 
-		// TODO - make sure that key should not be in ""
 		elem := fmt.Sprintf("\t%s: %s", key, value)
 		mapElemsString = fmt.Sprintf("%s\n%s%s", mapElemsString, tabsIndent(indent), elem)
 	}

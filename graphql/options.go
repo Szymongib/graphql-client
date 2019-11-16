@@ -38,5 +38,3 @@ func WithParserOptions(parserOpts ParserOptions) Option {
 		o.parserOptions = parserOpts
 	})
 }
-
-// TODO: some hook on response copy?
