@@ -6,5 +6,4 @@ env:
 go:
   - "1.13"
 
-build:
-  script: ./verify.sh
+script: ./verify.sh
