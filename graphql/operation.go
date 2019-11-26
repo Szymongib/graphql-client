@@ -3,6 +3,7 @@ package graphql
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type Operation struct {
@@ -30,7 +31,40 @@ const (
 	Mutation OperationType = "mutation"
 )
 
+type Input struct {
+	// Input is input of main operation
+	Input OperationInput
+	// NestedInputs are inputs of sub operations
+	NestedInputs []NestedOperationInput
+}
+
 type OperationInput map[string]interface{}
+
+type NestedOperationInput struct {
+	// FieldPath is jsonpath of the field to which query input should be used
+	FieldPath FieldPath
+	Input     OperationInput // TODO - I wonder if there should be Operation Input or rather plain string
+}
+
+type FieldPath string
+
+func (fp FieldPath) Append(name string) FieldPath {
+	return FieldPath(fmt.Sprintf("%s.%s", fp, name))
+}
+
+func (fp FieldPath) Matches(others ...FieldPath) bool {
+	trimmed := strings.TrimPrefix(string(fp), ".")
+
+	for _, otherFP := range others {
+		otherTrimmed := strings.TrimPrefix(string(otherFP), ".")
+
+		if trimmed == otherTrimmed {
+			return true
+		}
+	}
+
+	return false
+}
 
 func (o OperationInput) sortedKeys() []string {
 	keys := make([]string, 0, len(o))

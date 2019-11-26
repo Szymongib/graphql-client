@@ -12,11 +12,11 @@ const (
 	jsonTagKey = "json"
 )
 
-func ParseToGQLQuery(data interface{}) string {
-	return parseToGQLQuery(data, 0)
+func ParseToGQLQuery(data interface{}, nestedInputs ...NestedOperationInput) string {
+	return parseToGQLQuery(data, "", 0, nestedInputs)
 }
 
-func parseToGQLQuery(data interface{}, indent int) string {
+func parseToGQLQuery(data interface{}, fieldPath FieldPath, indent int, nestedInputs []NestedOperationInput) string {
 	reflectVal := reflect.ValueOf(data)
 
 	reflectVal = unwrapPointerOrInterface(reflectVal)
@@ -30,8 +30,26 @@ func parseToGQLQuery(data interface{}, indent int) string {
 				queriedName = reflectVal.Type().Field(i).Name
 			}
 
-			// TODO: this space may be confusing, consider removing it
-			field := fmt.Sprintf("%s %s", queriedName, parseToGQLQuery(reflectVal.Field(i).Interface(), indent+1))
+			inputString := ""
+			currentFieldPath := fieldPath.Append(queriedName)
+			for _, input := range nestedInputs {
+				if currentFieldPath.Matches(input.FieldPath) {
+					var err error
+					inputString, err = ParseToGQLInput(input.Input)
+					if err != nil {
+						panic(err) // TODO - handle error
+					}
+
+					inputString = fmt.Sprintf("(%s)", inputString)
+				}
+			}
+
+			fieldQuery := parseToGQLQuery(reflectVal.Field(i).Interface(), currentFieldPath, indent+1, nestedInputs)
+
+			field := queriedName
+			field = appendIfNotEmpty(field, inputString, "")
+			field = appendIfNotEmpty(field, fieldQuery, " ")
+
 			fieldsString = fmt.Sprintf("%s\n%s%s", fieldsString, tabsIndent(indent+1), field)
 		}
 
@@ -42,7 +60,7 @@ func parseToGQLQuery(data interface{}, indent int) string {
 
 	if reflectVal.Kind() == reflect.Slice || reflectVal.Kind() == reflect.Array {
 		sliceElemObj := reflectVal.Type().Elem()
-		return parseToGQLQuery(reflect.New(sliceElemObj).Interface(), indent)
+		return parseToGQLQuery(reflect.New(sliceElemObj).Interface(), fieldPath, indent, nestedInputs)
 	}
 
 	return ""
@@ -70,4 +88,11 @@ func tabsIndent(tabsCount int) (tabs string) {
 	}
 
 	return tabs
+}
+
+func appendIfNotEmpty(base, appendix, separator string) string {
+	if appendix != "" {
+		return fmt.Sprintf("%s%s%s", base, separator, appendix)
+	}
+	return base
 }

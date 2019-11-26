@@ -15,6 +15,7 @@ type ParserOptions struct {
 	SkipZeroValues bool
 }
 
+// TODO - consider adding option for skipping enters
 func ParseToGQLInput(input OperationInput, options ...ParserOptions) (string, error) {
 	if input == nil {
 		return "", nil

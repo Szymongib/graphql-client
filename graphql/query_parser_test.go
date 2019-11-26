@@ -91,11 +91,11 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				InterfaceField: "test",
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
-	InterfaceField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
+	InterfaceField
 }`,
 		},
 		{
@@ -108,11 +108,11 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				InterfaceField: "test",
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
-	InterfaceField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
+	InterfaceField
 }`,
 		},
 		{
@@ -125,16 +125,16 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				InterfaceField: simpleStruct{},
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
 	InterfaceField {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 }`,
 		},
@@ -148,16 +148,16 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				InterfaceField: []simpleStruct{},
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
 	InterfaceField {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 }`,
 		},
@@ -170,10 +170,10 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				BoolsSlice:      []bool{true, false},
 			},
 			expectedQuery: `{
-	StringsSlice 
-	IntsSlice 
-	StringPtrsSlice 
-	BoolsSlice 
+	StringsSlice
+	IntsSlice
+	StringPtrsSlice
+	BoolsSlice
 }`,
 		},
 		{
@@ -185,10 +185,10 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				BoolsSlice:      nil,
 			},
 			expectedQuery: `{
-	StringsSlice 
-	IntsSlice 
-	StringPtrsSlice 
-	BoolsSlice 
+	StringsSlice
+	IntsSlice
+	StringPtrsSlice
+	BoolsSlice
 }`,
 		},
 		{
@@ -200,20 +200,20 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				SliceStructField:  sliceStruct{},
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
+	StringField
+	IntField
 	SimpleStructField {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 	SliceStructField {
-		StringsSlice 
-		IntsSlice 
-		StringPtrsSlice 
-		BoolsSlice 
+		StringsSlice
+		IntsSlice
+		StringPtrsSlice
+		BoolsSlice
 	}
 }`,
 		},
@@ -228,26 +228,26 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				SliceStructField: sliceStruct{},
 			},
 			expectedQuery: `{
-	StringField 
-	IntField 
+	StringField
+	IntField
 	SimpleStructField {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
 		InterfaceField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 	}
 	SliceStructField {
-		StringsSlice 
-		IntsSlice 
-		StringPtrsSlice 
-		BoolsSlice 
+		StringsSlice
+		IntsSlice
+		StringPtrsSlice
+		BoolsSlice
 	}
 }`,
 		},
@@ -260,46 +260,46 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				SliceStructsField:    []sliceStruct{},
 			},
 			expectedQuery: `{
-	StringField 
+	StringField
 	EmbeddedStructField {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 	EmbeddedStructsField {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 	SliceStructsField {
-		StringsSlice 
-		IntsSlice 
-		StringPtrsSlice 
-		BoolsSlice 
+		StringsSlice
+		IntsSlice
+		StringPtrsSlice
+		BoolsSlice
 	}
 }`,
 		},
@@ -311,9 +311,9 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				SliceField:  []string{},
 			},
 			expectedQuery: `{
-	stringField 
-	intField 
-	sliceField 
+	stringField
+	intField
+	sliceField
 }`,
 		},
 		{
@@ -325,17 +325,17 @@ func Test_ParseToGQLQuery(t *testing.T) {
 				JsonTaggedStructs: nil,
 			},
 			expectedQuery: `{
-	stringField 
-	intField 
+	stringField
+	intField
 	jsonTaggedStruct {
-		stringField 
-		intField 
-		sliceField 
+		stringField
+		intField
+		sliceField
 	}
 	jsonTaggedStructs {
-		stringField 
-		intField 
-		sliceField 
+		stringField
+		intField
+		sliceField
 	}
 }`,
 		},
@@ -348,62 +348,62 @@ func Test_ParseToGQLQuery(t *testing.T) {
 			name: "slice of pointers",
 			data: []*simpleStruct{},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
-	InterfaceField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
+	InterfaceField
 }`,
 		},
 		{
 			name: "nil slice of pointers",
 			data: nilSliceOfSimpleStructs,
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
-	InterfaceField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
+	InterfaceField
 }`,
 		},
 		{
 			name: "slice of structs",
 			data: []simpleStruct{},
 			expectedQuery: `{
-	StringField 
-	IntField 
-	StringPtrField 
-	BoolField 
-	InterfaceField 
+	StringField
+	IntField
+	StringPtrField
+	BoolField
+	InterfaceField
 }`,
 		},
 		{
 			name: "included pointers struct with nil pointers",
 			data: includedPointersStruct{},
 			expectedQuery: `{
-	name 
+	name
 	simpleStructPtr {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 	embeddedStructPtr {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 }`,
@@ -412,29 +412,29 @@ func Test_ParseToGQLQuery(t *testing.T) {
 			name: "included pointers struct with non nil pointers",
 			data: includedPointersStruct{SimpleStructPtr: &simpleStruct{}, EmbeddedStructPtr: &embeddedStruct{}},
 			expectedQuery: `{
-	name 
+	name
 	simpleStructPtr {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 	embeddedStructPtr {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 }`,
@@ -443,29 +443,29 @@ func Test_ParseToGQLQuery(t *testing.T) {
 			name: "slices of pointers struct with non nil slices",
 			data: slicesOfPointersStruct{SimpleStructPtrs: []*simpleStruct{}, EmbeddedStructPtrs: []*embeddedStruct{}},
 			expectedQuery: `{
-	name 
+	name
 	simpleStructPtrs {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 	embeddedStructPtrs {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 }`,
@@ -474,29 +474,29 @@ func Test_ParseToGQLQuery(t *testing.T) {
 			name: "slices of pointers struct with nil slices",
 			data: slicesOfPointersStruct{SimpleStructPtrs: nil, EmbeddedStructPtrs: nil},
 			expectedQuery: `{
-	name 
+	name
 	simpleStructPtrs {
-		StringField 
-		IntField 
-		StringPtrField 
-		BoolField 
-		InterfaceField 
+		StringField
+		IntField
+		StringPtrField
+		BoolField
+		InterfaceField
 	}
 	embeddedStructPtrs {
-		StringField 
-		IntField 
+		StringField
+		IntField
 		SimpleStructField {
-			StringField 
-			IntField 
-			StringPtrField 
-			BoolField 
-			InterfaceField 
+			StringField
+			IntField
+			StringPtrField
+			BoolField
+			InterfaceField
 		}
 		SliceStructField {
-			StringsSlice 
-			IntsSlice 
-			StringPtrsSlice 
-			BoolsSlice 
+			StringsSlice
+			IntsSlice
+			StringPtrsSlice
+			BoolsSlice
 		}
 	}
 }`,
@@ -505,13 +505,13 @@ func Test_ParseToGQLQuery(t *testing.T) {
 			name: "maps struct",
 			data: mapsStruct{},
 			expectedQuery: `{
-	SimpleMap 
-	FloatMap 
-	StructMap 
-	InterfaceMap 
-	PointersMap 
-	MapAlias 
-	NilMapPlaceholder 
+	SimpleMap
+	FloatMap
+	StructMap
+	InterfaceMap
+	PointersMap
+	MapAlias
+	NilMapPlaceholder
 }`,
 		},
 		{
@@ -527,4 +527,60 @@ func Test_ParseToGQLQuery(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
+
+	for _, testCase := range []struct {
+		name          string
+		data          interface{}
+		nestedInputs  []NestedOperationInput
+		expectedQuery string
+	}{
+		{
+			name: "simple struct",
+			data: jsonTaggedComplexStruct{
+				StringField:       "test",
+				IntField:          0,
+				JsonTaggedStruct:  jsonTaggedStruct{},
+				JsonTaggedStructs: nil,
+			},
+			nestedInputs: []NestedOperationInput{
+				{
+					FieldPath: FieldPath(".jsonTaggedStruct"),
+					Input: OperationInput{"in": simpleStruct{
+						StringField:    "test",
+						IntField:       3,
+						StringPtrField: nil,
+						BoolField:      false,
+						InterfaceField: nil,
+					}},
+				},
+			},
+			expectedQuery: `{
+	stringField
+	intField
+	jsonTaggedStruct(in: {
+	StringField: "test"
+	IntField: 3
+	BoolField: false
+}) {
+		stringField
+		intField
+		sliceField
+	}
+	jsonTaggedStructs {
+		stringField
+		intField
+		sliceField
+	}
+}`,
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			query := ParseToGQLQuery(testCase.data, testCase.nestedInputs...)
+			t.Log(query)
+			assert.Equal(t, testCase.expectedQuery, query)
+		})
+	}
 }
