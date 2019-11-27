@@ -43,7 +43,10 @@ type OperationInput map[string]interface{}
 type NestedOperationInput struct {
 	// FieldPath is jsonpath of the field to which query input should be used
 	FieldPath FieldPath
-	Input     OperationInput // TODO - I wonder if there should be Operation Input or rather plain string
+	// Input is string containing GraphQL query input in from of comma separated parameters, ex:
+	// `myParam: "paramValue", otherParam: { first: "firstValue" second: "secondValue"}`
+	// can be created by ParseToGraphQLInput
+	Input string
 }
 
 type FieldPath string

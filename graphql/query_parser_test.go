@@ -531,6 +531,8 @@ func Test_ParseToGQLQuery(t *testing.T) {
 
 func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
 
+	// TODO - more test cases
+
 	for _, testCase := range []struct {
 		name          string
 		data          interface{}
@@ -548,23 +550,13 @@ func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
 			nestedInputs: []NestedOperationInput{
 				{
 					FieldPath: FieldPath(".jsonTaggedStruct"),
-					Input: OperationInput{"in": simpleStruct{
-						StringField:    "test",
-						IntField:       3,
-						StringPtrField: nil,
-						BoolField:      false,
-						InterfaceField: nil,
-					}},
+					Input:     `in: { StringField: "test" IntField: 3 BoolField: false }`,
 				},
 			},
 			expectedQuery: `{
 	stringField
 	intField
-	jsonTaggedStruct(in: {
-	StringField: "test"
-	IntField: 3
-	BoolField: false
-}) {
+	jsonTaggedStruct(in: { StringField: "test" IntField: 3 BoolField: false }) {
 		stringField
 		intField
 		sliceField

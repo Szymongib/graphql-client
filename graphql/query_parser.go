@@ -34,13 +34,7 @@ func parseToGQLQuery(data interface{}, fieldPath FieldPath, indent int, nestedIn
 			currentFieldPath := fieldPath.Append(queriedName)
 			for _, input := range nestedInputs {
 				if currentFieldPath.Matches(input.FieldPath) {
-					var err error
-					inputString, err = ParseToGQLInput(input.Input)
-					if err != nil {
-						panic(err) // TODO - handle error
-					}
-
-					inputString = fmt.Sprintf("(%s)", inputString)
+					inputString = fmt.Sprintf("(%s)", input.Input)
 				}
 			}
 

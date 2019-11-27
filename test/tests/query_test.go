@@ -13,6 +13,8 @@ import (
 	"github.com/szymongib/graphql-client/graphql"
 )
 
+// TODO: nested queries test
+
 func Test_Query(t *testing.T) {
 	gqlClient := graphql.NewClient(apiAddress)
 
