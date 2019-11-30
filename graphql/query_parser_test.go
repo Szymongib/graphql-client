@@ -531,8 +531,6 @@ func Test_ParseToGQLQuery(t *testing.T) {
 
 func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
 
-	// TODO - more test cases
-
 	for _, testCase := range []struct {
 		name          string
 		data          interface{}
@@ -540,7 +538,7 @@ func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
 		expectedQuery string
 	}{
 		{
-			name: "simple struct",
+			name: "top level input",
 			data: jsonTaggedComplexStruct{
 				StringField:       "test",
 				IntField:          0,
@@ -565,6 +563,76 @@ func Test_ParseToGQLQueryWithNestedInputs(t *testing.T) {
 		stringField
 		intField
 		sliceField
+	}
+}`,
+		},
+		{
+			name: "deeper level input",
+			data: jsonTaggedComplexStruct{
+				StringField:       "test",
+				IntField:          0,
+				JsonTaggedStruct:  jsonTaggedStruct{},
+				JsonTaggedStructs: nil,
+			},
+			nestedInputs: []NestedOperationInput{
+				{
+					FieldPath: FieldPath(".jsonTaggedStruct.stringField"),
+					Input:     `in: { key: "value" }, id: "abcd-efgh"`,
+				},
+			},
+			expectedQuery: `{
+	stringField
+	intField
+	jsonTaggedStruct {
+		stringField(in: { key: "value" }, id: "abcd-efgh")
+		intField
+		sliceField
+	}
+	jsonTaggedStructs {
+		stringField
+		intField
+		sliceField
+	}
+}`,
+		},
+		{
+			name: "multiple inputs",
+			data: jsonTaggedComplexStruct{
+				StringField:       "test",
+				IntField:          0,
+				JsonTaggedStruct:  jsonTaggedStruct{},
+				JsonTaggedStructs: nil,
+			},
+			nestedInputs: []NestedOperationInput{
+				{
+					FieldPath: FieldPath(".jsonTaggedStruct.stringField"),
+					Input:     `in: { key: "value" }, id: "abcd-efgh"`,
+				},
+				{
+					FieldPath: FieldPath(".jsonTaggedStruct.intField"),
+					Input:     `input: { key: "myIntField" }, id: "ijkl-mnop"`,
+				},
+				{
+					FieldPath: FieldPath(".jsonTaggedStructs.sliceField"),
+					Input:     `id: "slice-field-abc"`,
+				},
+				{
+					FieldPath: FieldPath(".stringField"),
+					Input:     `string: "field"`,
+				},
+			},
+			expectedQuery: `{
+	stringField(string: "field")
+	intField
+	jsonTaggedStruct {
+		stringField(in: { key: "value" }, id: "abcd-efgh")
+		intField(input: { key: "myIntField" }, id: "ijkl-mnop")
+		sliceField
+	}
+	jsonTaggedStructs {
+		stringField
+		intField
+		sliceField(id: "slice-field-abc")
 	}
 }`,
 		},
