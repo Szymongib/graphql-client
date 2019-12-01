@@ -42,9 +42,9 @@ func Test_E2e_Flow(t *testing.T) {
 
 	// add dogs to human
 	dogsInput := []*schema.DogInput{
-		dogInput("Dog1", util.IntPtr(1), []*schema.DistinguishingFeatureInput{{"Black spots", util.Float64Ptr(1)}}),
-		dogInput("Dog2", util.IntPtr(2), []*schema.DistinguishingFeatureInput{{"Black spots", util.Float64Ptr(2)}}),
-		dogInput("Dog3", util.IntPtr(3), []*schema.DistinguishingFeatureInput{{"Black spots", util.Float64Ptr(3)}}),
+		dogInput("Dog1", util.IntPtr(1), []*schema.DistinguishingFeatureInput{{"black-spots", "Black spots", util.Float64Ptr(1)}}),
+		dogInput("Dog2", util.IntPtr(2), []*schema.DistinguishingFeatureInput{{"white-nose", "Dog has a white nose", util.Float64Ptr(2)}}),
+		dogInput("Dog3", util.IntPtr(3), []*schema.DistinguishingFeatureInput{{"black-spots", "Black spots", util.Float64Ptr(3)}}),
 	}
 
 	for i, dogInput := range dogsInput {
@@ -55,8 +55,9 @@ func Test_E2e_Flow(t *testing.T) {
 		assert.Equal(t, "Dog"+strconv.Itoa(i+1), dog.Name)
 		assert.Equal(t, human.ID, dog.OwnerID)
 		assert.Equal(t, util.IntPtr(i+1), dog.TailLength)
-		assert.Equal(t, "Black spots", dog.DistinguishingFeatures[0].Description)
-		assert.Equal(t, util.Float64Ptr(float64(i+1)), dog.DistinguishingFeatures[0].SpottingDifficulty)
+		assert.Equal(t, dogsInput[i].DistinguishingFeatures[0].Name, dog.DistinguishingFeatures[0].Name)
+		assert.Equal(t, dogsInput[i].DistinguishingFeatures[0].Description, dog.DistinguishingFeatures[0].Description)
+		assert.Equal(t, dogsInput[i].DistinguishingFeatures[0].Intensity, dog.DistinguishingFeatures[0].Intensity)
 	}
 
 	// query dogs
@@ -73,6 +74,30 @@ func Test_E2e_Flow(t *testing.T) {
 	assert.Equal(t, 3, len(dogs))
 	for _, dog := range dogs {
 		assert.Equal(t, human.ID, dog.OwnerID)
+	}
+
+	// query human with dogs with black spots only
+	filters := []*schema.FeatureFilterInput{
+		{FeatureName: "black-spots"},
+	}
+
+	filtersInput, err := graphql.ParseToGQLInput(graphql.OperationInput{"filters": filters})
+	require.NoError(t, err)
+
+	var humanWithBlackSpottedDogs schema.Human
+	humanWithBlackSpottedDogsOperation := graphql.Operation{
+		Type:                   graphql.Query,
+		Name:                   "human",
+		Requested:              &humanWithBlackSpottedDogs,
+		Input:                  graphql.OperationInput{"id": human.ID},
+		NestedOperationsInputs: []graphql.NestedOperationInput{{FieldPath: ".dogs", Input: filtersInput}},
+	}
+	err = gqlClient.Run(context.Background(), humanWithBlackSpottedDogsOperation, &humanWithBlackSpottedDogs)
+	require.NoError(t, err)
+
+	assert.Len(t, humanWithBlackSpottedDogs.Dogs, 2)
+	for _, dog := range humanWithBlackSpottedDogs.Dogs {
+		assert.Equal(t, "black-spots", dog.DistinguishingFeatures[0].Name)
 	}
 
 	//// create another human

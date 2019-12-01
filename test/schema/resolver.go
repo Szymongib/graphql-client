@@ -12,17 +12,54 @@ const (
 	HeadersContextKey = "Headers"
 )
 
-type Resolver struct {
+func NewResolver() Resolver {
+	db := &Database{
+		HumansDb: []*Human{},
+		DogsDb:   []*Dog{},
+	}
+
+	return Resolver{
+		Database:         db,
+		humanResolver:    humanResolver{Database: db},
+		queryResolver:    queryResolver{Database: db},
+		mutationResolver: mutationResolver{Database: db},
+	}
+}
+
+type Database struct {
 	HumansDb []*Human
 	DogsDb   []*Dog
 }
 
+type Resolver struct {
+	*Database
+	humanResolver    humanResolver
+	queryResolver    queryResolver
+	mutationResolver mutationResolver
+}
+
+type queryResolver struct {
+	*Database
+}
+
+type mutationResolver struct {
+	*Database
+}
+
+type humanResolver struct {
+	*Database
+}
+
 func (r *Resolver) Mutation() MutationResolver {
-	return r
+	return &r.mutationResolver
 }
 
 func (r *Resolver) Query() QueryResolver {
-	return r
+	return &r.queryResolver
+}
+
+func (r *Resolver) Human() HumanResolver {
+	return &r.humanResolver
 }
 
 func (r *Resolver) ResetData() {
@@ -32,37 +69,83 @@ func (r *Resolver) ResetData() {
 
 // Queries
 
-func (r *Resolver) Humans(ctx context.Context) ([]*Human, error) {
+func (r *queryResolver) Humans(ctx context.Context) ([]*Human, error) {
 	return r.HumansDb, nil
 }
 
-func (r *Resolver) Dogs(ctx context.Context) ([]*Dog, error) {
-	return r.DogsDb, nil
+func (r *humanResolver) Dogs(ctx context.Context, obj *Human, limit *int, offset *int, filters []*FeatureFilterInput) ([]*Dog, error) {
+	if len(r.DogsDb) == 0 {
+		return r.DogsDb, nil
+	}
+
+	var dogs []*Dog
+
+	if filters != nil {
+		dogs = filterDogs(r.DogsDb, obj.ID, filters)
+	} else {
+		dogs = r.DogsDb
+	}
+
+	dogsOffset := 0
+	if offset != nil {
+		dogsOffset = *offset
+		if dogsOffset >= len(dogs) {
+			dogsOffset = len(dogs) - 1
+		}
+	}
+
+	end := len(dogs)
+	if limit != nil {
+		end := dogsOffset + *limit
+		if end >= len(dogs) {
+			end = len(dogs) - 1
+		}
+	}
+
+	return dogs[dogsOffset:end], nil
 }
 
-func (r *Resolver) Human(ctx context.Context, id string) (*Human, error) {
+func filterDogs(dogs []*Dog, humanId string, filters []*FeatureFilterInput) []*Dog {
+	var filteredDogs []*Dog
+
+	for _, f := range filters {
+		for _, d := range dogs {
+			if d.OwnerID == humanId && FeaturesSatisfiesFilter(d.DistinguishingFeatures, *f) {
+				filteredDogs = append(filteredDogs, d)
+			}
+		}
+	}
+
+	return filteredDogs
+}
+
+func (r *queryResolver) Human(ctx context.Context, id string) (*Human, error) {
 	return r.getHumanById(id)
 }
 
-func (r *Resolver) Dog(ctx context.Context, id string) (*Dog, error) {
+func (r *queryResolver) Dog(ctx context.Context, id string) (*Dog, error) {
 	return r.getDogById(id)
 }
 
-func (r *Resolver) HeadersQuery(ctx context.Context) ([]*Header, error) {
+func (r *queryResolver) Dogs(ctx context.Context) ([]*Dog, error) {
+	return r.DogsDb, nil
+}
+
+func (r *queryResolver) HeadersQuery(ctx context.Context) ([]*Header, error) {
 	return getHeaders(ctx), nil
 }
 
-func (r *Resolver) ErrorsQuery(ctx context.Context) (string, error) {
+func (r *queryResolver) ErrorsQuery(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("error you requested")
 }
 
 // Mutations
 
-func (r *Resolver) ErrorsMutation(ctx context.Context) (string, error) {
+func (r *mutationResolver) ErrorsMutation(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("error you requested")
 }
 
-func (r *Resolver) HeadersMutation(ctx context.Context) ([]*Header, error) {
+func (r *mutationResolver) HeadersMutation(ctx context.Context) ([]*Header, error) {
 	return getHeaders(ctx), nil
 }
 
@@ -96,7 +179,7 @@ func strPtrSlice(slice []string) []*string {
 	return strPtrs
 }
 
-func (r *Resolver) CreateHuman(ctx context.Context, in HumanInput) (*Human, error) {
+func (r *mutationResolver) CreateHuman(ctx context.Context, in HumanInput) (*Human, error) {
 	humanId := uuid.New().String()
 
 	dogs := make([]*Dog, 0, len(in.Dogs))
@@ -124,7 +207,7 @@ func (r *Resolver) CreateHuman(ctx context.Context, in HumanInput) (*Human, erro
 	return human, nil
 }
 
-func (r *Resolver) CreateDog(ctx context.Context, humanID string, in DogInput) (*Dog, error) {
+func (r *mutationResolver) CreateDog(ctx context.Context, humanID string, in DogInput) (*Dog, error) {
 	human, err := r.getHumanById(humanID)
 	if err != nil {
 		return nil, err
@@ -150,8 +233,9 @@ func newDistinguishingFeatures(input []*DistinguishingFeatureInput) []*Distingui
 
 	for _, feature := range input {
 		f := DistinguishingFeature{
-			Description:        feature.Description,
-			SpottingDifficulty: feature.SpottingDifficulty,
+			Name:        feature.Name,
+			Description: feature.Description,
+			Intensity:   feature.Intensity,
 		}
 
 		newFeatures = append(newFeatures, &f)
@@ -160,7 +244,7 @@ func newDistinguishingFeatures(input []*DistinguishingFeatureInput) []*Distingui
 	return newFeatures
 }
 
-func (r *Resolver) getDogById(dogId string) (*Dog, error) {
+func (r *Database) getDogById(dogId string) (*Dog, error) {
 	for _, d := range r.DogsDb {
 		if d.ID == dogId {
 			return d, nil
@@ -170,7 +254,7 @@ func (r *Resolver) getDogById(dogId string) (*Dog, error) {
 	return nil, fmt.Errorf("dog with ID %s not found", dogId)
 }
 
-func (r *Resolver) getHumanById(humanId string) (*Human, error) {
+func (r *Database) getHumanById(humanId string) (*Human, error) {
 	for _, h := range r.HumansDb {
 		if h.ID == humanId {
 			return h, nil

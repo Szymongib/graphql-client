@@ -3,13 +3,15 @@
 package schema
 
 type DistinguishingFeature struct {
-	Description        string   `json:"description"`
-	SpottingDifficulty *float64 `json:"spottingDifficulty"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Intensity   *float64 `json:"intensity"`
 }
 
 type DistinguishingFeatureInput struct {
-	Description        string   `json:"description"`
-	SpottingDifficulty *float64 `json:"spottingDifficulty"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Intensity   *float64 `json:"intensity"`
 }
 
 type Dog struct {
@@ -26,15 +28,13 @@ type DogInput struct {
 	DistinguishingFeatures []*DistinguishingFeatureInput `json:"distinguishingFeatures"`
 }
 
+type FeatureFilterInput struct {
+	FeatureName string `json:"featureName"`
+}
+
 type Header struct {
 	Name   string    `json:"name"`
 	Values []*string `json:"values"`
-}
-
-type Human struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Dogs []*Dog `json:"dogs"`
 }
 
 type HumanInput struct {

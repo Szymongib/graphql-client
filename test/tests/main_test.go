@@ -46,7 +46,8 @@ func TestMain(m *testing.M) {
 }
 
 func setupTests(m *testing.M) int {
-	resolver = newResolver()
+	r := schema.NewResolver()
+	resolver = &r
 
 	gqlCfg := schema.Config{
 		Resolvers: resolver,

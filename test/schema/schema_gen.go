@@ -34,6 +34,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Human() HumanResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -43,8 +44,9 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	DistinguishingFeature struct {
-		Description        func(childComplexity int) int
-		SpottingDifficulty func(childComplexity int) int
+		Description func(childComplexity int) int
+		Intensity   func(childComplexity int) int
+		Name        func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -61,7 +63,7 @@ type ComplexityRoot struct {
 	}
 
 	Human struct {
-		Dogs func(childComplexity int) int
+		Dogs func(childComplexity int, limit *int, offset *int, filters []*FeatureFilterInput) int
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
 	}
@@ -83,6 +85,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type HumanResolver interface {
+	Dogs(ctx context.Context, obj *Human, limit *int, offset *int, filters []*FeatureFilterInput) ([]*Dog, error)
+}
 type MutationResolver interface {
 	CreateHuman(ctx context.Context, in HumanInput) (*Human, error)
 	CreateDog(ctx context.Context, humanID string, in DogInput) (*Dog, error)
@@ -120,12 +125,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DistinguishingFeature.Description(childComplexity), true
 
-	case "DistinguishingFeature.spottingDifficulty":
-		if e.complexity.DistinguishingFeature.SpottingDifficulty == nil {
+	case "DistinguishingFeature.intensity":
+		if e.complexity.DistinguishingFeature.Intensity == nil {
 			break
 		}
 
-		return e.complexity.DistinguishingFeature.SpottingDifficulty(childComplexity), true
+		return e.complexity.DistinguishingFeature.Intensity(childComplexity), true
+
+	case "DistinguishingFeature.name":
+		if e.complexity.DistinguishingFeature.Name == nil {
+			break
+		}
+
+		return e.complexity.DistinguishingFeature.Name(childComplexity), true
 
 	case "Dog.distinguishingFeatures":
 		if e.complexity.Dog.DistinguishingFeatures == nil {
@@ -181,7 +193,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Human.Dogs(childComplexity), true
+		args, err := ec.field_Human_dogs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Human.Dogs(childComplexity, args["limit"].(*int), args["offset"].(*int), args["filters"].([]*FeatureFilterInput)), true
 
 	case "Human.id":
 		if e.complexity.Human.ID == nil {
@@ -367,19 +384,25 @@ input DogInput {
 }
 
 type DistinguishingFeature {
+    name: String!
     description: String!
-    spottingDifficulty: Float
+    intensity: Float
 }
 
 input DistinguishingFeatureInput {
+    name: String!
     description: String!
-    spottingDifficulty: Float
+    intensity: Float
+}
+
+input FeatureFilterInput {
+    featureName: String!
 }
 
 type Human {
     id: ID!
     name: String!
-    dogs: [Dog]
+    dogs(limit: Int, offset: Int, filters: [FeatureFilterInput]): [Dog]
 }
 
 input HumanInput {
@@ -413,6 +436,36 @@ type Mutation {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Human_dogs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
+	var arg2 []*FeatureFilterInput
+	if tmp, ok := rawArgs["filters"]; ok {
+		arg2, err = ec.unmarshalOFeatureFilterInput2ᚕᚖgithubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filters"] = arg2
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createDog_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -528,6 +581,43 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _DistinguishingFeature_name(ctx context.Context, field graphql.CollectedField, obj *DistinguishingFeature) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "DistinguishingFeature",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _DistinguishingFeature_description(ctx context.Context, field graphql.CollectedField, obj *DistinguishingFeature) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -565,7 +655,7 @@ func (ec *executionContext) _DistinguishingFeature_description(ctx context.Conte
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _DistinguishingFeature_spottingDifficulty(ctx context.Context, field graphql.CollectedField, obj *DistinguishingFeature) (ret graphql.Marshaler) {
+func (ec *executionContext) _DistinguishingFeature_intensity(ctx context.Context, field graphql.CollectedField, obj *DistinguishingFeature) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -584,7 +674,7 @@ func (ec *executionContext) _DistinguishingFeature_spottingDifficulty(ctx contex
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.SpottingDifficulty, nil
+		return obj.Intensity, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -939,13 +1029,20 @@ func (ec *executionContext) _Human_dogs(ctx context.Context, field graphql.Colle
 		Object:   "Human",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Human_dogs_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Dogs, nil
+		return ec.resolvers.Human().Dogs(rctx, obj, args["limit"].(*int), args["offset"].(*int), args["filters"].([]*FeatureFilterInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2581,15 +2678,21 @@ func (ec *executionContext) unmarshalInputDistinguishingFeatureInput(ctx context
 
 	for k, v := range asMap {
 		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description":
 			var err error
 			it.Description, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "spottingDifficulty":
+		case "intensity":
 			var err error
-			it.SpottingDifficulty, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			it.Intensity, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2620,6 +2723,24 @@ func (ec *executionContext) unmarshalInputDogInput(ctx context.Context, obj inte
 		case "distinguishingFeatures":
 			var err error
 			it.DistinguishingFeatures, err = ec.unmarshalODistinguishingFeatureInput2ᚕᚖgithubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐDistinguishingFeatureInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFeatureFilterInput(ctx context.Context, obj interface{}) (FeatureFilterInput, error) {
+	var it FeatureFilterInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "featureName":
+			var err error
+			it.FeatureName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2672,13 +2793,18 @@ func (ec *executionContext) _DistinguishingFeature(ctx context.Context, sel ast.
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("DistinguishingFeature")
+		case "name":
+			out.Values[i] = ec._DistinguishingFeature_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "description":
 			out.Values[i] = ec._DistinguishingFeature_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "spottingDifficulty":
-			out.Values[i] = ec._DistinguishingFeature_spottingDifficulty(ctx, field, obj)
+		case "intensity":
+			out.Values[i] = ec._DistinguishingFeature_intensity(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2777,15 +2903,24 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Human_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Human_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "dogs":
-			out.Values[i] = ec._Human_dogs(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Human_dogs(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3749,6 +3884,38 @@ func (ec *executionContext) unmarshalODogInput2ᚖgithubᚗcomᚋszymongibᚋgra
 		return nil, nil
 	}
 	res, err := ec.unmarshalODogInput2githubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐDogInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOFeatureFilterInput2githubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx context.Context, v interface{}) (FeatureFilterInput, error) {
+	return ec.unmarshalInputFeatureFilterInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOFeatureFilterInput2ᚕᚖgithubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx context.Context, v interface{}) ([]*FeatureFilterInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*FeatureFilterInput, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalOFeatureFilterInput2ᚖgithubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOFeatureFilterInput2ᚖgithubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx context.Context, v interface{}) (*FeatureFilterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOFeatureFilterInput2githubᚗcomᚋszymongibᚋgraphqlᚑclientᚋtestᚋschemaᚐFeatureFilterInput(ctx, v)
 	return &res, err
 }
 

@@ -17,3 +17,8 @@ struct_tag: json
 # graphql. These normally come from the db or a remote api.
 
 models:
+  Human:
+    model: "github.com/szymongib/graphql-client/test/schema.Human"
+    fields:
+      dogs:
+        resolver: true

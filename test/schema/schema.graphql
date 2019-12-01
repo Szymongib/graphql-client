@@ -16,19 +16,25 @@ input DogInput {
 }
 
 type DistinguishingFeature {
+    name: String!
     description: String!
-    spottingDifficulty: Float
+    intensity: Float
 }
 
 input DistinguishingFeatureInput {
+    name: String!
     description: String!
-    spottingDifficulty: Float
+    intensity: Float
+}
+
+input FeatureFilterInput {
+    featureName: String!
 }
 
 type Human {
     id: ID!
     name: String!
-    dogs: [Dog]
+    dogs(limit: Int = 100, offset: Int = 0, filters: [FeatureFilterInput]): [Dog]
 }
 
 input HumanInput {

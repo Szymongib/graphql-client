@@ -7,10 +7,11 @@ import (
 )
 
 type Operation struct {
-	Type      OperationType
-	Name      string
-	Requested interface{}
-	Input     OperationInput
+	Type                   OperationType
+	Name                   string
+	Requested              interface{}
+	Input                  OperationInput
+	NestedOperationsInputs []NestedOperationInput
 }
 
 func (o Operation) ToQueryString(options ...ParserOptions) (string, error) {
@@ -21,7 +22,7 @@ func (o Operation) ToQueryString(options ...ParserOptions) (string, error) {
 
 	return fmt.Sprintf(`%s {
 	result: %s(%s) %s
-}`, o.Type, o.Name, parsedInput, ParseToGQLQuery(o.Requested)), nil
+}`, o.Type, o.Name, parsedInput, ParseToGQLQuery(o.Requested, o.NestedOperationsInputs...)), nil
 }
 
 type OperationType string
